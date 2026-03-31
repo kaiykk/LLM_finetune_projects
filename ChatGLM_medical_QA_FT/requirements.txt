@@ -1,0 +1,22 @@
+# Core Dependencies
+llamafactory>=0.7.0  # Fine-tuning framework
+vllm>=0.4.0  # High-performance inference engine
+torch>=2.3.0  # PyTorch deep learning framework
+transformers>=4.40.0  # HuggingFace transformers
+
+# Quantization and Optimization
+bitsandbytes>=0.43.0  # 8-bit and 4-bit quantization
+accelerate>=0.30.0  # Distributed training utilities
+
+# Data Processing
+datasets>=2.18.0  # HuggingFace datasets library
+pyyaml>=6.0  # YAML configuration parsing
+
+# Testing (Optional)
+hypothesis>=6.100.0  # Property-based testing
+pytest>=8.0.0  # Unit testing framework
+
+# Development Tools (Optional)
+black>=24.0.0  # Code formatter
+flake8>=7.0.0  # Linter
+mypy>=1.9.0  # Type checker
