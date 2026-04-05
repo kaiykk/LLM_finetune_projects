@@ -1,0 +1,16 @@
+### IMPORTANT: DO NOT use quantized model or quantization_bit when merging LoRA adapters
+# Merging requires full precision weights from the base model
+
+### Model Configuration
+# Specifies the base model and LoRA adapter to merge
+model_name_or_path: ZhipuAI/glm-4-9b-chat  # Base GLM-4 9B chat model (must be unquantized)
+adapter_name_or_path: /root/autodl-tmp/checkpoints/huatuo-glm-qlora  # Path to trained LoRA adapter
+template: glm4  # Chat template for GLM-4 model
+finetuning_type: lora  # Specify that we're merging LoRA adapters
+
+### Export Configuration
+# Defines how to save the merged model
+export_dir: /root/autodl-tmp/checkpoints/huatuo-glm-qlora-merge  # Output directory for merged model
+export_size: 2  # Shard size in GB (splits model into multiple files)
+export_device: cpu  # Device for export operation (cpu is safer for large models)
+export_legacy_format: false  # Use modern safetensors format (not legacy PyTorch)

@@ -1,0 +1,7 @@
+### Model Configuration for vLLM Inference
+# Specifies the merged model and inference backend settings
+
+model_name_or_path: /root/autodl-tmp/checkpoints/huatuo-glm-qlora-merge  # Path to merged model
+template: glm4  # Chat template for GLM-4 model
+infer_backend: vllm  # Use vLLM for high-performance inference
+vllm_enforce_eager: true  # Disable CUDA graphs (more compatible, slightly slower)
