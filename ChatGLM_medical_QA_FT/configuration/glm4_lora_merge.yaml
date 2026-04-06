@@ -1,16 +1,49 @@
-### IMPORTANT: DO NOT use quantized model or quantization_bit when merging LoRA adapters
-# Merging requires full precision weights from the base model
-
+trust_remote_code: true
 ### Model Configuration
-# Specifies the base model and LoRA adapter to merge
-model_name_or_path: ZhipuAI/glm-4-9b-chat  # Base GLM-4 9B chat model (must be unquantized)
-adapter_name_or_path: /root/autodl-tmp/checkpoints/huatuo-glm-qlora  # Path to trained LoRA adapter
-template: glm4  # Chat template for GLM-4 model
-finetuning_type: lora  # Specify that we're merging LoRA adapters
+# Specifies the base model and quantization settings for efficient training
+model_name_or_path: /home/featurize/models/glm-4-9b-chat  # GLM-4 9B chat model (local path)
+# quantization_bit: 4  # 4-bit quantization for QLoRA (was 8-bit, OOM on 12GB GPU)
+# quantization_method: bitsandbytes  # Quantization library: [bitsandbytes (4/8), hqq (2/3/4/5/6/8), eetq (8)]
 
-### Export Configuration
-# Defines how to save the merged model
-export_dir: /root/autodl-tmp/checkpoints/huatuo-glm-qlora-merge  # Output directory for merged model
-export_size: 2  # Shard size in GB (splits model into multiple files)
-export_device: cpu  # Device for export operation (cpu is safer for large models)
-export_legacy_format: false  # Use modern safetensors format (not legacy PyTorch)
+### Training Method
+# Defines the training stage and fine-tuning approach
+stage: sft  # Supervised fine-tuning stage
+do_train: true  # Enable training mode
+finetuning_type: lora  # Use LoRA (Low-Rank Adaptation) for parameter-efficient fine-tuning
+lora_target: all  # Apply LoRA to all applicable layers
+
+### Dataset Configuration
+# Specifies the training dataset and preprocessing settings
+dataset: huatuo  # Huatuo medical encyclopedia QA dataset (registered in dataset_info.json)
+template: glm4  # Chat template for GLM-4 model
+cutoff_len: 1024  # Max sequence length (reduced from 1024 to save VRAM on 12GB GPU)
+max_samples: 10000  # Limit training samples (remove or increase for full dataset)
+overwrite_cache: true  # Regenerate preprocessed cache
+preprocessing_num_workers: 16  # Parallel workers for data preprocessing
+
+### Output Configuration
+# Defines where to save checkpoints and logs
+output_dir: /home/featurize/huatuo_glm_fintune/checkpoints/huatuo-glm-qlora  # Checkpoint save directory
+logging_steps: 10  # Log metrics every N steps
+save_steps: 500  # Save checkpoint every N steps
+plot_loss: true  # Generate loss curve plot
+overwrite_output_dir: true  # Overwrite existing output directory
+
+### Training Hyperparameters
+# Core training settings that affect model performance and resource usage
+per_device_train_batch_size: 1  # Batch size per GPU (increase if memory allows)
+gradient_accumulation_steps: 8  # Accumulate gradients over N steps (effective batch size = 1 * 8 = 8)
+learning_rate: 1.0e-4  # Initial learning rate (higher than full fine-tuning)
+num_train_epochs: 1.0  # Number of complete passes through the dataset
+lr_scheduler_type: cosine  # Learning rate schedule (cosine annealing)
+warmup_ratio: 0.1  # Warmup for first 10% of training steps
+bf16: true  # Use bfloat16 mixed precision (requires Ampere+ GPUs)
+ddp_timeout: 180000000  # Distributed training timeout (milliseconds)
+gradient_checkpointing: true  # Enable gradient checkpointing to save VRAM
+
+### Evaluation Configuration
+# Settings for validation during training
+val_size: 0.1  # Use 10% of training data for validation
+per_device_eval_batch_size: 1  # Batch size for evaluation
+eval_strategy: steps  # Evaluate every N steps (not per epoch)
+eval_steps: 500  # Run evaluation every 500 training steps
